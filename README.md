@@ -36,3 +36,12 @@ The output of algorithms are stored in corresponding folder in folder `results`.
 See `results/results SIPP-IP/res-empty_64_64-SIPP-IP-obs163.txt` for an example.
 
 We also added function `printSolutionStates` inside the codes of the algorithms to print the solution states. It can be used to print out the solutions.
+
+
+```bash
+g++ -std=c++11 src/SIPP-IP.cpp -o exec/sipp-ip
+```
+
+```bash
+python scripts/visualize_plan.py results/solutions/xxx.txt
+```

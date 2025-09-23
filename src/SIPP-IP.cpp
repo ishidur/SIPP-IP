@@ -328,6 +328,26 @@ void printSolutionStates(int goal_id){
     }
     cout<<"--------"<<endl;
 }
+
+void saveSolutionToFile(int goal_id, const string& map_name, int test_num, int num_obs) {
+    vector<Bot> v;
+    getSolutionStates(goal_id, v);
+
+    string filename = "../results/solutions/sol-" + map_name + "-SIPP-IP-obs" + to_string(num_obs) + "-test" + to_string(test_num) + ".txt";
+    ofstream sol_out(filename);
+
+    if (!sol_out.is_open()) {
+        cerr << "Error: Could not open solution file " << filename << endl;
+        return;
+    }
+
+    sol_out << "x,y,t_lower,t_upper,o,v" << endl;
+    for (const auto& state : v) {
+        sol_out << state.x << "," << state.y << "," << state.t_lower << "," << state.t_upper << "," << state.o << "," << state.v << endl;
+    }
+    sol_out.close();
+}
+
 int main() {
     cout<<"SIPP-IP started... map:"<<map<<endl;
     ofstream out;
@@ -347,7 +367,8 @@ int main() {
             double diffTime = duration_cast<microseconds>(high_resolution_clock::now() - start_time).count();
             out << "Success:" << ans.second << ", Cost:"<< CLOSED_vec[ans.first].t_lower << ", Runtime:" << diffTime << "\n";
             if (ans.second) {
-                // printSolutionStates(ans.first);
+                printSolutionStates(ans.first);
+                saveSolutionToFile(ans.first, map, testNum, num_of_obstacles);
             }
         }
         out.close();
