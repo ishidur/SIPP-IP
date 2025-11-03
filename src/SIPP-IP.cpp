@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cassert>
+#include <cmath>
 #include "../include/constants.h"
 using namespace std;
 using namespace std::chrono;
@@ -341,10 +342,45 @@ void saveSolutionToFile(int goal_id, const string& map_name, int test_num, int n
         return;
     }
 
-    sol_out << "x,y,t_lower,t_upper,o,v" << endl;
-    for (const auto& state : v) {
-        sol_out << state.x << "," << state.y << "," << state.t_lower << "," << state.t_upper << "," << state.o << "," << state.v << endl;
+    sol_out << "t,x,y" << endl;
+    if (v.empty()) {
+        sol_out.close();
+        return;
     }
+
+    for (size_t i = 0; i < v.size() - 1; ++i) {
+        const auto& start_state = v[i];
+        const auto& end_state = v[i+1];
+
+        int start_time = start_state.t_lower;
+        int end_time = end_state.t_lower;
+        
+        if (start_time >= end_time) {
+            if (i == 0) {
+                 sol_out << start_state.t_lower << "," << start_state.x << "," << start_state.y << endl;
+            }
+            continue;
+        }
+
+        double start_x = start_state.x;
+        double start_y = start_state.y;
+        double end_x = end_state.x;
+        double end_y = end_state.y;
+
+        int duration = end_time - start_time;
+
+        for (int t = 0; t < duration; ++t) {
+            int current_time = start_time + t;
+            double ratio = static_cast<double>(t) / duration;
+            int current_x = static_cast<int>(round(start_x + ratio * (end_x - start_x)));
+            int current_y = static_cast<int>(round(start_y + ratio * (end_y - start_y)));
+            sol_out << current_time << "," << current_x << "," << current_y << endl;
+        }
+    }
+
+    const auto& last_state = v.back();
+    sol_out << last_state.t_lower << "," << last_state.x << "," << last_state.y << endl;
+
     sol_out.close();
 }
 
@@ -375,4 +411,3 @@ int main() {
     }
     return 0;
 }
-

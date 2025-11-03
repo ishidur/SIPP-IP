@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.widgets import Slider, Button
 import numpy as np
-import os
 import re
 from pathlib import Path
 
@@ -72,18 +71,10 @@ def visualize_matplotlib_slider_plan(solution_file: Path):
         return
 
     # --- 2. Prepare data for animation ---
-    plan_df = plan_df.sort_values(by="t_lower").reset_index(drop=True)
-    agent_path_df = pd.DataFrame(
-        [
-            {
-                "t": t,
-                "x": plan_df[plan_df["t_lower"] <= t].iloc[-1]["x"],
-                "y": plan_df[plan_df["t_lower"] <= t].iloc[-1]["y"],
-            }
-            for t in range(int(plan_df["t_lower"].max()) + 1)
-        ]
-    )
-    agent_path_df.set_index("t", inplace=True)
+    # The new solution file format is already t,x,y per timestep.
+    agent_path_df = plan_df.set_index("t")
+    max_time = agent_path_df.index.max()
+
 
     # --- 3. Setup the plot ---
     fig, ax = plt.subplots(figsize=(10, 10 * H / W))
@@ -97,7 +88,8 @@ def visualize_matplotlib_slider_plan(solution_file: Path):
     )
     ax.plot(st_y, st_x, "go", markersize=10, label="Start")
     ax.plot(end_y, end_x, "ro", markersize=10, label="End")
-    ax.plot(plan_df["y"], plan_df["x"], "b--", alpha=0.3, label="Full Path")
+    # Use agent_path_df for the full path plot
+    ax.plot(agent_path_df["y"], agent_path_df["x"], "b--", alpha=0.3, label="Full Path")
 
     (agent_plot,) = ax.plot([], [], "bo", markersize=6, label="Agent")
     dyn_obs_plots = ax.scatter(
@@ -124,8 +116,10 @@ def visualize_matplotlib_slider_plan(solution_file: Path):
     # --- 4. Define update function for animation and slider ---
     def update_frame(t):
         t = int(t)
-        agent_pos = agent_path_df.loc[t]
-        agent_plot.set_data([agent_pos["y"]], [agent_pos["x"]])
+        # Use .get(t, default=None) or check if t is in index to avoid KeyError
+        if t in agent_path_df.index:
+            agent_pos = agent_path_df.loc[t]
+            agent_plot.set_data([agent_pos["y"]], [agent_pos["x"]])
 
         dyn_obs_plots.set_offsets(np.empty((0, 2)))
 
@@ -146,7 +140,7 @@ def visualize_matplotlib_slider_plan(solution_file: Path):
         ax=ax_slider,
         label="Time",
         valmin=0,
-        valmax=int(plan_df["t_lower"].max()),
+        valmax=max_time, # Use calculated max_time
         valinit=0,
         valstep=1,
     )
@@ -156,7 +150,7 @@ def visualize_matplotlib_slider_plan(solution_file: Path):
     ani = animation.FuncAnimation(
         fig,
         update_frame,
-        frames=range(int(plan_df["t_lower"].max()) + 1),
+        frames=range(max_time + 1), # Use calculated max_time
         blit=False,
         interval=50,
         repeat=False,

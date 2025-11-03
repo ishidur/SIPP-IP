@@ -17,9 +17,9 @@ using namespace std;
 // string map = "room-64-64-16";
 
 /** map empty_1_16 ready specifications. Uncomment the three lines below to use this map. **/
-#define MXH 1 // maximum height of the environment
-#define MXW 16 // maximum width of the environment
-string map = "empty_1_16";
+// #define MXH 1 // maximum height of the environment
+// #define MXW 16 // maximum width of the environment
+// string map = "empty_1_16";
 
 /** map empty_64_64 ready specifications. Uncomment the three lines below to use this map. **/
 // #define MXH 64 // maximum height of the environment
@@ -37,9 +37,9 @@ string map = "empty_1_16";
 // string map = "Sydney_2_256";
 
 /** map random128 ready specifications. Uncomment the three lines below to use this map. **/
-// #define MXH 128 // maximum height of the environment
-// #define MXW 128 // maximum width of the environment
-// string map = "random128";
+#define MXH 128 // maximum height of the environment
+#define MXW 128 // maximum width of the environment
+string map = "random128";
 
 
 const int NumOfTests = 1;
